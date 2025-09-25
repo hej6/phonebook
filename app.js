@@ -1,4 +1,3 @@
-
 // setting up requireds
 const http = require('http');
 //const fileServer = require('./fileServer.js');
@@ -18,12 +17,15 @@ phoneBook[9] = {name: "Liza", phone: "860-400-8781"};
 
 
 // server call back function
-const myserver = http.createServer(function(req,res){
+const myserver = http.createServer(function(req,res)
+{
 	let urlObj = url.parse(req.url,"true");
 	let pathname = urlObj.pathname;
 	console.log(pathname);
+
 	//routing depending on pathname
-	switch (pathname) {
+	switch (pathname) 
+	{
 		case "/displayall":
 			displayall(res);
 			break;
@@ -32,11 +34,44 @@ const myserver = http.createServer(function(req,res){
 			break;
 		// if none of the expected request pathnames, it must be a  path to a file
 		default :
-			fileServer.sendFile("./public_html"+pathname,res);
+			fileServer.sendFile("./public_html" + pathname,res);
 			break;
 	
 	}
 });
+
+function displayall(response)
+{
+	response.writeHead(200, {'Content-Type': 'application/json'});
+	response.write(JSON.stringify(phoneBook));
+	response.end();
+}
+
+function search(response, queryObj)
+{
+	if(!queryObj || !queryObj.name)
+	{
+		response.writeHead(400, {'Content-Type': 'text/plain'});
+		response.write('Query missing or incorrect');
+		response.end();
+	}
+	else
+	{
+		let entry = phoneBook.find(element => element.name == queryObj.name);
+		if (entry)
+		{
+			response.writeHead(200, {'Content-Type': 'text/plain'});
+			response.write(entry.phone);
+			response.end();
+		}
+		else
+		{
+			response.writeHead(200, {'Content-Type': 'text/plain'});
+			response.write('Name not in phonebook');
+			response.end();
+		}
+	}
+}
 
 // start the server
 myserver.listen(80);
